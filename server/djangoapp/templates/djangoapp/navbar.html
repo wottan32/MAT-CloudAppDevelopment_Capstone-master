@@ -1,0 +1,30 @@
+  <nav class="navbar navbar-expand-md navbar-light">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#dealernav" aria-controls="navbarTogglerDealerNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+      </button>
+      <a class="navbar-brand" href="#">Best Cars Dealership</a>
+      <div class="collapse navbar-collapse" id="dealernav">
+              <a class="nav-link" href="{% url 'djangoapp:about' %}">About</a>
+              <a class="nav-link" href="{% url 'djangoapp:contact' %}">Contact Us</a>
+      </div>
+      <div class="nav navbar-nav navbar-right">
+          {% if user.is_authenticated %}
+            {% if 'djangoapp/dealer/' in requestpath %}
+            <a class="btn btn-link" href="{% url 'djangoapp:add_review' dealer_id=dealerId %}">
+                Add Review</a>
+            {% endif %}
+            <span class="navbar-text">{{ user.first_name }}({{ user.username }})</span>
+            <a class="btn btn-link" href="{% url 'djangoapp:logout' %}">Logout</a>
+          {% else %}
+            <form class="form-inline" action="{% url 'djangoapp:login' %}" method="POST">
+                {% csrf_token %}
+                <input class="form-control mr-sm-2" type="text" placeholder="Username"
+                    name="uname" aria-label="Username">
+                <input class="form-control mr-sm-2" type="password" placeholder="Password"
+                    name="psw" aria-label="Password">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Login</button>
+                <a class="btn btn-link" href="{% url 'djangoapp:registration' %}">Sign Up</a>
+            </form>
+          {% endif %}
+      </div>
+  </nav>
