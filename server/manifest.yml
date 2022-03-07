@@ -1,11 +1,11 @@
   applications:
   - name: djangoapp
     routes:
-      - route: wlccloudcapstone.mybluemix.net
+      - route: djangokone.mybluemix.net
     memory: 128M
     buildpack: python_buildpack
   - name: djangoapp-nginx
     routes:
-      - route: wlccloudcapstone.mybluemix.net/static
+      - route: djangokone.mybluemix.net/static
     memory: 128M
     buildpack: staticfile_buildpack
