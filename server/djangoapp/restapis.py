@@ -1,6 +1,6 @@
 import requests
 import json
-from .models import CarDealer, DealerReview
+from . import models 
 from django.core import serializers
 from requests.auth import HTTPBasicAuth
 from ibm_watson import NaturalLanguageUnderstandingV1
@@ -18,15 +18,14 @@ def get_request(url, **kwargs):
     print(kwargs)
     print("GET from {} ".format(url))
     try:
-            response = requests.get(url, headers={'Content-Type': 'application/json'},
-            params=kwargs)
+        response = requests.get(url, headers={'Content-Type': 'application/json'},params=kwargs)
     except:
         #if any error
         print("Network exception occurred")
         status_code = response.status_code
         print("With status {} ".format(status_code))
-    json_data = json.loads(response.text)
-    return json_data
+        json_data = json.loads(response.text)
+        return json_data
 
 # Create a `post_request` to make HTTP POST requests
 # e.g., response = requests.post(url, params=kwargs, json=payload)
@@ -59,7 +58,7 @@ def get_dealers_from_cf(url, **kwargs):
                 dealer_doc = dealer
             else:
                 dealer_doc = dealer["doc"]
-            dealer_obj = CarDealer(
+                dealer_obj = CarDealer(
                 address=dealer_doc["address"],
                 city=dealer_doc["city"],
                 full_name=dealer_doc["full_name"],
@@ -71,8 +70,8 @@ def get_dealers_from_cf(url, **kwargs):
                 zip=dealer_doc["zip"],
                 state=dealer_doc["state"]
                 )
-            results.append(dealer_obj)
-        return results
+                results.append(dealer_obj)
+    return results
 
 # Create a get_dealer_reviews_from_cf method to get reviews by dealer id from a cloud function
 # def get_dealer_by_id_from_cf(url, dealerId):
