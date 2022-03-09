@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
-from .models import CarDealer, CarModel
+from . import models
 from .restapis import (get_request, get_dealers_from_cf, get_dealer_reviews_from_cf, post_request,
                     get_reviews_count)
 from django.contrib.auth import login, logout, authenticate
@@ -38,6 +38,7 @@ def login_request(request):
         user = authenticate(username=username, password=password)
     if user is not None:
         login(request,user)
+        #return redirect('/djangoapp/')
         return redirect('djangoapp:index')
     else:
         return render(request, 'djangoapp/registration.html')
@@ -105,7 +106,7 @@ def add_review(request, dealer_id):
     if request.user.is_authenticated:
         context={}
         if request.method == "GET":
-            cars = CarModel.objects.filter(dealer_id=dealer_id)
+            cars = models.CarModel.objects.filter(dealer_id=dealer_id)
             context['cars'] = cars
             context['dealer_id']=dealer_id
             return render(request, 'djangoapp/add_review.html', context)
@@ -113,24 +114,30 @@ def add_review(request, dealer_id):
             print(request.POST)
             url = "https://d47998ca.us-south.apigw.appdomain.cloud/api/review"
             review = {}
-            review["id"] = get_reviews_count(url) + 1
+            review["id"] = get_reviews_count(url) + '{#}'
             review["time"] = datetime.utcnow().isoformat()
             review["dealerId"] = dealer_id
             review["review"] = request.POST["content"]
             review["name"] = request.user.username
             if request.POST['purchasecheck'] == "on":
-                review["purchase"] = True
+                review["purchase"] = True #change from True
             else:
                 review["purchase"] = False
-            review["purchase_date"]= request.POST["purchasedate"]
-            review["car_make"]= "Jeep"
-            review["car_model"]= "Gladiator"
-            review["car_year"]= 2021
+                review["purchase_date"]= request.POST["purchasedate"]
+                review["car_make"] = car.carmake.name
+                review["car_model"] = car.name
+                review["car_year"]= car.year.strftime("%Y")
+                
+                #review["car_make"]= "Jeep"
+                #review["car_model"]= "Gladiator"
+                #review["car_year"]= 2021
 
-            json_payload = {}
-            json_payload = review
-            response = post_request(url, json_payload, params=review)
-            return redirect('djangoapp:dealer_details', dealer_id=dealer_id)
+                json_payload = {}
+                json_payload = review
+                print (json_payload)
+                #restapis.post_request(url, json_payload, dealerId=dealer_id)
+                response = post_request(url, json_payload, params=review)
+                return redirect('djangoapp:dealer_details', dealer_id=dealer_id)
         else:
             return HttpResponse("Invalid Request type: " + request.method)
     else:
