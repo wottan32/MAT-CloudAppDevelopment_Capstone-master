@@ -15,7 +15,7 @@ api_key = os.environ.get("API_KEY")
 # e.g., response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
 #                                     auth=HTTPBasicAuth('apikey', api_key))
 def get_request(url, **kwargs):
-    # print(kwargs)
+    print(kwargs)
     global response
     print("GET from {} ".format(url))
     try:
@@ -23,22 +23,30 @@ def get_request(url, **kwargs):
     except:
         #if any error
         print("Network exception occurred")
-        status_code = response.status_code
-        print("With status {} ".format(status_code))
-        json_data = json.loads(response.text)
-        return json_data
+    
+    status_code = response.status_code
+    print("With status {} ".format(status_code))
+    json_data = json.loads(response.text)
+    return json_data
 
 # Create a `post_request` to make HTTP POST requests
 # e.g., response = requests.post(url, params=kwargs, json=payload)
 def post_request(url, json_payload, **kwargs):
+    #json_obj = json_payload["review"]
     print(kwargs)
-    response = requests.post(url, params=kwargs, json=json_payload)
+    try:
+        response = requests.post(url, params=kwargs, json=json_payload)
+    except:
+        print("Something went wrong")
+    print (response)
     return response
 
 # Create a get_dealers_from_cf method to get dealers from a cloud function
 # def get_dealers_from_cf(url, **kwargs):
 # - Call get_request() with specified arguments
 # - Parse JSON results into a CarDealer object list
+
+
 def get_dealers_from_cf(url, **kwargs):
     results = []
     st = kwargs.get("st")
@@ -71,7 +79,7 @@ def get_dealers_from_cf(url, **kwargs):
                 zip=dealer_doc["zip"],
                 state=dealer_doc["state"]
                 )
-                results.append(dealer_obj)
+            results.append(dealer_obj)
     return results
 
 # Create a get_dealer_reviews_from_cf method to get reviews by dealer id from a cloud function
@@ -117,8 +125,8 @@ def get_dealer_reviews_from_cf(url, **kwargs):
                 id = review["id"]
                 )
                 print(review_obj.sentiment)
-                results.append(review_obj)
-        return results
+            results.append(review_obj)
+    return results
 
 # Create an `analyze_review_sentiments` method to call Watson NLU and analyze text
 # def analyze_review_sentiments(text):
