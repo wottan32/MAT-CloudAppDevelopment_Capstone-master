@@ -3,8 +3,8 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from . import models
-from .restapis import (get_request, get_dealers_from_cf, get_dealer_reviews_from_cf, post_request,
-                    get_reviews_count)
+from .restapis import (get_request, get_dealers_from_cf, get_dealer_reviews_from_cf, post_request, get_reviews_count)
+#from . import restapis
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime, date
@@ -75,13 +75,24 @@ def registration_request(request):
 
 
 # Update the `get_dealerships` view to render the index page with a list of dealerships
+#def get_dealerships(request):
+#    context = {}
+#    if request.method == "GET":
+#        url = "https://d47998ca.us-south.apigw.appdomain.cloud/api/api/dealership"
+#        dealerships = get_dealers_from_cf(url)
+ #       dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
+ #       context = {'dealerships' : dealerships}
+ #       return render(request, 'djangoapp/index.html', context)
+
 def get_dealerships(request):
     context = {}
     if request.method == "GET":
-        url = "https://d47998ca.us-south.apigw.appdomain.cloud/api/api/dealership"
-        dealerships = get_dealers_from_cf(url)
-        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
-        context = {'dealerships' : dealerships}
+        #url = 'https://5b93346d.us-south.apigw.appdomain.cloud/dealerships/dealer-get'
+        url = 'https://d47998ca.us-south.apigw.appdomain.cloud/api/api/dealership'
+        # Get dealers from the URL
+        context = {"dealerships": restapis.get_dealers_from_cf(url)}
+        # Concat all dealer's short name
+        # Return a list of dealer short name
         return render(request, 'djangoapp/index.html', context)
 
 
@@ -107,6 +118,7 @@ def add_review(request, dealer_id):
         context={}
         if request.method == "GET":
             cars = models.CarModel.objects.filter(dealer_id=dealer_id)
+            #cars = models.CarModel.objects.filter(dealer_id=dealer_id)
             context['cars'] = cars
             context['dealer_id']=dealer_id
             return render(request, 'djangoapp/add_review.html', context)
@@ -114,7 +126,8 @@ def add_review(request, dealer_id):
             print(request.POST)
             url = "https://d47998ca.us-south.apigw.appdomain.cloud/api/review"
             review = {}
-            review["id"] = get_reviews_count(url) + '{#}'
+            #review["id"] = get_reviews_count(url) + '{#}'
+            review["id"] = get_reviews_count(url) + 1
             review["time"] = datetime.utcnow().isoformat()
             review["dealerId"] = dealer_id
             review["review"] = request.POST["content"]
@@ -124,9 +137,12 @@ def add_review(request, dealer_id):
             else:
                 review["purchase"] = False
                 review["purchase_date"]= request.POST["purchasedate"]
-                review["car_make"] = car.carmake.name
-                review["car_model"] = car.name
-                review["car_year"]= car.year.strftime("%Y")
+                review["car_make"] = models.carmake.name
+                review["car_model"] = models.carmodel.name
+                review["car_year"]= models.carmodel.year.strftime("%Y")
+                #review["car_make"] = car.carmake.name
+                #review["car_model"] = car.name
+                #review["car_year"]= car.year.strftime("%Y")
                 
                 #review["car_make"]= "Jeep"
                 #review["car_model"]= "Gladiator"
@@ -137,7 +153,7 @@ def add_review(request, dealer_id):
                 print (json_payload)
                 #restapis.post_request(url, json_payload, dealerId=dealer_id)
                 response = post_request(url, json_payload, params=review)
-                return redirect('djangoapp:dealer_details', dealer_id=dealer_id)
+            return redirect('djangoapp:dealer_details', dealer_id=dealer_id)
         else:
             return HttpResponse("Invalid Request type: " + request.method)
     else:

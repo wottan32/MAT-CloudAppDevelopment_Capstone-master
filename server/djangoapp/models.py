@@ -27,17 +27,27 @@ class CarMake(models.Model):
 # - Any other fields you would like to include in car model
 # - __str__ method to print a car make object
 class CarModel(models.Model):
-    class CarType(models.TextChoices):
-        COUPE = 'CPE', _('Coupe')
-        PICKUP = 'PKU', _('Pickup')
-        SEDAN = 'SDN', _('Sedan')
-        SUV = 'SUV'
-        WAGON = 'WGN', _('wagon')
+    #class CarType(models.TextChoices):
+    #    COUPE = 'CPE', _('Coupe')
+    #    PICKUP = 'PKU', _('Pickup')
+    #    SEDAN = 'SDN', _('Sedan')
+    #    SUV = 'SUV'
+    #    WAGON = 'WGN', _('wagon')
+
+    CarType = (
+        ('CPE', 'COUPE'),
+        ('PKU', 'PICKUP'),
+        ('SDN', 'SEDAN'),
+        ('SUV', 'SUV'),
+        ('WGN', 'WAGON')
+    )
+
     
     car_make = models.ForeignKey(CarMake, on_delete=models.CASCADE)
     name = models.CharField(null=False, max_length=60)
     dealer_id = models.IntegerField(null=False)
-    car_type = models.CharField(null=False, choices=CarType.choices, max_length=25)
+    car_type = models.CharField(null=False, choices=CarType, max_length=25)
+    #car_type = models.CharField(null=False, choices=CarType.choices, max_length=25)
     year = models.PositiveSmallIntegerField(null=False, validators=[MinValueValidator(1900)])
     
     def __str__(self):
@@ -77,5 +87,4 @@ class DealerReview:
         self.id = id
     
     def __str__(self):
-        return "Review: " + self.review   
-    
+        return "Review: " + self.review

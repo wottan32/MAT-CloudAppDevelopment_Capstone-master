@@ -15,7 +15,8 @@ api_key = os.environ.get("API_KEY")
 # e.g., response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
 #                                     auth=HTTPBasicAuth('apikey', api_key))
 def get_request(url, **kwargs):
-    print(kwargs)
+    # print(kwargs)
+    global response
     print("GET from {} ".format(url))
     try:
         response = requests.get(url, headers={'Content-Type': 'application/json'},params=kwargs)
@@ -58,7 +59,7 @@ def get_dealers_from_cf(url, **kwargs):
                 dealer_doc = dealer
             else:
                 dealer_doc = dealer["doc"]
-                dealer_obj = CarDealer(
+                dealer_obj = models.CarDealer(
                 address=dealer_doc["address"],
                 city=dealer_doc["city"],
                 full_name=dealer_doc["full_name"],
@@ -88,32 +89,32 @@ def get_dealer_reviews_from_cf(url, **kwargs):
         for review in reviews:
             sentiment = analyze_review_sentiments(review["review"])
             if review["purchase"] is False:
-                review_obj = DealerReview(
-                    name = review["name"],
-                    purchase = review["purchase"],
-                    dealership = review["dealership"],
-                    review = review["review"],
-                    purchase_date = None,
-                    car_make = "",
-                    car_model = "",
-                    car_year = "",
-                    sentiment = sentiment,
-                    id = review["id"]
+                review_obj = models.DealerReview(
+                name = review["name"],
+                purchase = review["purchase"],
+                dealership = review["dealership"],
+                review = review["review"],
+                purchase_date = None,
+                car_make = "",
+                car_model = "",
+                car_year = "",
+                sentiment = sentiment,
+                id = review["id"]
                 )
                 print(review_obj.sentiment)
                 results.append(review_obj)
             else:
-                review_obj = DealerReview(
-                    name = review["name"],
-                    purchase = review["purchase"],
-                    dealership = review["dealership"],
-                    review = review["review"],
-                    purchase_date = review["purchase_date"],
-                    car_make = review["car_make"],
-                    car_model = review["car_model"],
-                    car_year = review["car_year"],
-                    sentiment = sentiment,
-                    id = review["id"]
+                review_obj = models.DealerReview(
+                name = review["name"],
+                purchase = review["purchase"],
+                dealership = review["dealership"],
+                review = review["review"],
+                purchase_date = review["purchase_date"],
+                car_make = review["car_make"],
+                car_model = review["car_model"],
+                car_year = review["car_year"],
+                sentiment = sentiment,
+                id = review["id"]
                 )
                 print(review_obj.sentiment)
                 results.append(review_obj)
@@ -124,16 +125,16 @@ def get_dealer_reviews_from_cf(url, **kwargs):
 # - Call get_request() with specified arguments
 # - Get the returned sentiment label such as Positive or Negative
 def analyze_review_sentiments(dealerreview):
-    #url = "https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/dd20f8fb-1904-45f4-a586-6e2a0c3480fd"
-    url = "https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/4ce35e51-408e-40b6-934f-195e479cd3ae"
+    url = "https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/dd20f8fb-1904-45f4-a586-6e2a0c3480fd"
+    #url = "https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/4ce35e51-408e-40b6-934f-195e479cd3ae"
     authenticator = IAMAuthenticator(api_key)
     nlu = NaturalLanguageUnderstandingV1(version='2021-08-01',authenticator=authenticator)
     nlu.set_service_url(url)
 
     json_result = nlu.analyze(
-        text=dealerreview,
-        features=Features(sentiment=SentimentOptions()),
-        return_analyzed_text = True
+    text=dealerreview,
+    features=Features(sentiment=SentimentOptions()),
+    return_analyzed_text = True
     ).get_result()
     sentiment = json_result['sentiment']['document']['label']
     return sentiment
